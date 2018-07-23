@@ -100,6 +100,11 @@ bool mgos_aws_shadow_updatef(uint64_t version, const char *state_jsonf, ...);
  */
 bool mgos_aws_shadow_update_simple(double version, const char *state_json);
 
+/*
+ * Clear the desired state on update.
+ */
+void mgos_aws_clear_desired_state_on_update(bool clear);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -88,6 +88,8 @@ struct aws_shadow_state {
 
 static struct aws_shadow_state *s_shadow_state;
 
+static bool clear_desired_on_update = false;
+
 static char *get_aws_shadow_topic_name(const struct mg_str thing_name,
                                        enum mgos_aws_shadow_topic_id topic_id) {
   const char *s1 = NULL, *s2 = NULL;
@@ -483,7 +485,13 @@ bool mgos_aws_shadow_updatevf(uint64_t version, const char *state_jsonf,
   char token[TOKEN_BUF_SIZE];
   calc_token(s_shadow_state, token);
   struct json_out out = JSON_OUT_MBUF(&up->data);
-  json_printf(&out, "{state: {reported: ");
+  json_printf(&out, "{state: {");
+
+  if (clear_desired_on_update) {
+    json_printf(&out, "desired: %Q, ", NULL);
+  }
+
+  json_printf(&out, "reported: ");
   json_vprintf(&out, state_jsonf, ap);
   json_printf(&out, "}");
   if (version > 0) {
@@ -509,6 +517,10 @@ bool mgos_aws_shadow_updatef(uint64_t version, const char *state_jsonf, ...) {
 
 bool mgos_aws_shadow_update_simple(double version, const char *state_json) {
   return mgos_aws_shadow_updatef(version, "%s", state_json);
+}
+
+void mgos_aws_clear_desired_state_on_update(bool clear) {
+  clear_desired_on_update = clear;
 }
 
 const char *mgos_aws_shadow_event_name(enum mgos_aws_shadow_event ev) {
